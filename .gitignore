@@ -10,3 +10,4 @@ CHANNEL_TWO_ID=your_channel_id_here
 .env
 .env.*
 !.env.example
+env/
