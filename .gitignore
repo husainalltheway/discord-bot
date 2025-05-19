@@ -1,13 +1,41 @@
-# Discord Bot Configuration
-BOT_TOKEN=your_discord_bot_token_here
-SERVER_ID=your_server_id_here
-CLIENT_ID=your_client_id_here
-BASIC_CHANNEL_ID=your_channel_id_here
-CHANNEL_ONE_ID=your_channel_id_here
-CHANNEL_TWO_ID=your_channel_id_here
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
 
-# Environment variables
+# Virtual Environment
+venv/
+ENV/
+
+# Environment Variables
 .env
 .env.*
 !.env.example
-env/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db

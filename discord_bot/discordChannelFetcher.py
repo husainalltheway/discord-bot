@@ -12,17 +12,35 @@ class DiscordChannelFetcher:
             bot_token (str): Your Discord bot token
             command_prefix (str): Command prefix for bot commands
         """
+        if not bot_token:
+            raise ValueError("Bot token cannot be empty")
+            
         self.token = bot_token
-        self.bot = commands.Bot(command_prefix=command_prefix, intents=discord.Intents.all())
+        intents = discord.Intents.all()
+        self.bot = commands.Bot(command_prefix=command_prefix, intents=intents)
         
         # Register event handlers
         @self.bot.event
         async def on_ready():
             print(f"Bot is ready. Logged in as {self.bot.user}")
+            for guild in self.bot.guilds:
+                print(f"- {guild.name} (ID: {guild.id})")
+                
+        @self.bot.event
+        async def on_error(event, *args, **kwargs):
+            print(f"Error in {event}:", args, kwargs)
     
     async def start_bot(self):
         """Start the bot and connect to Discord"""
-        await self.bot.start(self.token)
+        try:
+            print("Attempting to start bot with token...")
+            await self.bot.start(self.token)
+        except discord.LoginFailure as e:
+            print("Failed to login: Invalid token")
+            raise
+        except Exception as e:
+            print(f"Error starting bot: {str(e)}")
+            raise
     
     async def close_bot(self):
         """Close the bot connection"""
@@ -87,6 +105,16 @@ class DiscordChannelFetcher:
         except discord.NotFound:
             return None
     
+    async def get_channel_users(self, channel_id):
+        """
+        Get all users in a channel
+        """
+        channel = await self.get_channel(channel_id)
+        if not channel:
+            return None
+        
+        return channel.members
+    
     async def get_pinned_messages(self, channel_id):
         """
         Get all pinned messages in a channel
@@ -139,14 +167,28 @@ class DiscordChannelFetcher:
         Returns:
             list: List of channel objects
         """
-        guild = self.bot.get_guild(guild_id)
-        if not guild:
-            try:
-                guild = await self.bot.fetch_guild(guild_id)
-            except discord.NotFound:
-                return None
-        
-        return guild.channels
+        try:
+            print(f"Attempting to fetch guild with ID: {guild_id}")
+            guild = self.bot.get_guild(guild_id)
+            if not guild:
+                print("Guild not found in cache, attempting to fetch...")
+                try:
+                    guild = await self.bot.fetch_guild(guild_id)
+                except discord.NotFound:
+                    print(f"Guild with ID {guild_id} not found")
+                    return None
+                except discord.Forbidden:
+                    print(f"Bot doesn't have permission to access guild {guild_id}")
+                    return None
+                except Exception as e:
+                    print(f"Error fetching guild: {str(e)}")
+                    return None
+            
+            print(f"Successfully fetched guild: {guild.name}")
+            return guild.channels
+        except Exception as e:
+            print(f"Unexpected error in get_guild_channels: {str(e)}")
+            return None
     
     async def get_messages_by_user(self, channel_id, user_id, limit=100):
         """
